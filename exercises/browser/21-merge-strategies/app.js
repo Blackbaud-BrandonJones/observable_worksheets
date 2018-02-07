@@ -4,9 +4,9 @@
   const completed = document.querySelector('#completed');
   const svg  = document.querySelector('svg');
 
-  const { Observable } = Rx;
-  const { fromEvent } = Observable;
-  const { mergeMap, scan, map, startWith, concat } = Rx.operators;
+  const { Observable, BehaviorSubject } = Rx;
+  const { fromEvent, of, merge, concat } = Observable;
+  const { mergeMap, scan, map, startWith, switchMap, concatMap  } = Rx.operators;
 
   const dropClick$ = fromEvent(drop, 'click');
 
@@ -44,6 +44,48 @@
           y: number; // y pixel position
         }
   */
+  //.mergeAll() = all observables I get, merge them into one 
+
+  // map(fn).switchAll() = switchMap(fn);
+  // map(fn). concatAll() = concatMap(fn);
+  // map().mergeAll() = mergeMap();
+  
+  // value$.subscribe(value => output.innerText = value);
+
+        merge(
+          dropClick$,
+          // fromEvent(document, 'mousemove'),
+          // fromEvent(listenButton, 'click').pipe(
+          //   switchMap(()=> listenFor('drop a ball'))
+          // )
+        )
+        .pipe(
+          mergeMap(e => 
+            concat(
+              of('DROP'),
+              addBall(svg),
+              of('COMPLETE'),
+            )
+          ),
+          scan((state, type) => {
+            switch (type) {
+              case 'DROP':
+                state.dropped++;
+                break;
+              case 'COMPLETE':
+                state.completed++;
+                break;     
+              default:
+                break;
+            }
+            return state;
+          }, { dropped: 0, completed: 0})
+        )
+        .subscribe(state => {
+          dropped.innerText = state.dropped;
+          completed.innerText = state.completed;
+        });
+
 
 
 

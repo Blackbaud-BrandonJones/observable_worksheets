@@ -1,7 +1,10 @@
 (function () {
   // NOTE: Setup ---------------------------------------------
 
-
+  const { Observable } = Rx;
+  const { fromEvent, ajax: { getJSON }, interval, webSocket, timer } = Observable;
+  const { map, switchMap, retryWhen } = Rx.operators;
+  
   // the div containing the search suggestion results
   const suggestions = document.querySelector('#suggestions');
 
@@ -15,6 +18,13 @@
   const getSearchURL = (query) => `/search?q=${query}`;
   // ---------------------------------------------------------
 
+  fromEvent(q, 'input')
+    .pipe(
+      map(() => q.value),
+      switchMap(search => getJSON(getSearchURL(search)))
+    )
+    .subscribe(showSuggestions);
+
   /**
       TODO: create an subscribe to an observable that does the
             look ahead search
@@ -24,9 +34,27 @@
   */
 
   // TODO: setup a WebSocketSubject
+  const socket$ = webSocket('ws://localhost:8080');
 
+  function multiplex(symbol) {
+    return socket$.multiplex(
+      () => JSON.stringify({ type: 'sub', symbol }),
+      () => JSON.stringify({ type: 'unsub', symbol }),
+      d => d.symbol === symbol,
+    ).pipe(
+      retryWhen(
+        error$ => error$.pipe(
+          switchMap(() => timer(2000)),
+        )
+      )
+    )
+  }
+  
   function getTickerStream(symbol) {
     // TODO: multiplex the web socket (then add retry logic)
+    return multiplex(symbol).pipe(
+      map(d => d.price)
+    );
   };
 
   // ***************************************************************************

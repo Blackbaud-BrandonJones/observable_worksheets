@@ -14,6 +14,17 @@ const fizzbuzzObserver = createLoggingObserver('fizzbuzz');
   3. Notify `fizzbuzzObserver` of all values from `scarce$` divisible by 3 AND 5.
 */
 
+// share calls publish() and refCount() for you, magic that creates a subject and count of subscriptions.
+// just use share almost all of the time you need to use multiCasting.
+const multi$ = scarce$.share();
+
+multi$.pipe(filter(x => x % 3 === 0)).subscribe(fizzObserver);
+multi$.pipe(filter(x => x % 5 === 0)).subscribe(buzzObserver);
+multi$.pipe(filter(x => x % 15 === 0)).subscribe(fizzbuzzObserver);
+
+// returns scarce$.subscribe(subject);
+
+
 /**
   NOTE: expected output
   fizz 0
@@ -32,4 +43,21 @@ const fizzbuzzObserver = createLoggingObserver('fizzbuzz');
   fizz done
   buzz done
   fizzbuzz done
+*/
+
+/*
+
+// practical use case for multicasting,  this makes one http request and lets us subscribe to it and use it in multiple methods.
+
+ class Comp {
+   data$ = this.http.get('url').share();
+
+   foo$ = this.data$.map(d => d.foo);
+
+   bar$ = this.data$.map(d => d.bar);
+ }
+
+<div>{{ foo$ | async }}</div>
+<div>{{ bar$ | async }}</div>
+
 */

@@ -1,4 +1,7 @@
+const Rx = require('rxjs/Rx');
 const Resource = require('./fixtures/6-Resource');
+
+// less likely to be used in Angular.
 
 // TODO: create an observable with the `Observable.fromEvent` over the same
 // `Resource` we used in exercise 6.
@@ -12,7 +15,11 @@ resource.removeEventListener('data', handler); // stop listening for data events
 
 HINT: You'll probably have to create the `Resource` first.
 */
+const resource = new Resource();
 
+// this is a hot observable, vs a cold observable
+// cold observable creates the thing that makes data for you when you subscribe,  hot observable sort of "wraps" the thing // already created.
+const source$ = Rx.Observable.fromEvent(resource, 'data');
 
 const subscription = source$.subscribe(
   x => console.log(x),
@@ -20,7 +27,7 @@ const subscription = source$.subscribe(
   () => console.info('done')
 );
 
-setTimeout(() => subscription.unsubscribe(), 2000);
+setTimeout(() => subscription.unsubscribe(), 2100);
 
 /**
 NOTE: output should be:

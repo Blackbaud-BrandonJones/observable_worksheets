@@ -13,7 +13,16 @@ resource.addEventListener('data', handler); // listen for data events
 resource.removeEventListener('data', handler); // stop listening for data events
 */
 
-const source$; // <-- set me!
+const source$ = new Rx.Observable(sub => {
+  const handler = e => sub.next(e);
+  const resource = new Resource(); // start the resource;
+  resource.addEventListener('data', handler); // listen for data events
+  
+  // guaranteed to be called on unsubscribe, error, etc.  tear down logic.
+  return () => {
+    resource.removeEventListener('data', handler); // stop listening for data events
+  }
+}); // <-- set me!
 const subscription = source$.subscribe(
   x => console.log(x),
   err => console.error(err),

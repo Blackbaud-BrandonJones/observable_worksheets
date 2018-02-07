@@ -19,16 +19,25 @@ const { meatspaceSystem, temp$ } = require('./fixtures/19-meatspace');
         demo code to run.
 */
 
+// replay-subject
+
 /** TODO:
   1. Notify all incoming users of the most recent THREE temperatures.
   2. Be sure the users don't have to wait for the first value.
 */
+
+// first value is how many values to hold, second param would be a time for how long to hold them before they fall off.
+// Share replay has the use case that you can retry it, though if it errors, it will create a new one instead of retrying it.
+const subject = new ReplaySubject(3);
+temp$.subscribe(subject);
+
 meatspaceSystem((user) => {
   // TODO: notify users with `user.sendTemperature(temp)`
-
+  const sub = subject.subscribe(temp => user.sendTemperature(temp));
   // `user.onleave` is called when the user stop watching values
   user.onleave = () => {
     // TODO: stop sending temps to the user when they leave
+    sub.unsubscribe();
   }
 });
 

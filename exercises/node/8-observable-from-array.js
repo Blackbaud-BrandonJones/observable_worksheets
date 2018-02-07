@@ -4,6 +4,9 @@ const data = ['apples', 'bananas', 'oranges'];
 
 //TODO: create an observable the `data` array with `Observable.from`
 
+// can take an array and convert it into an observable.  loops over the values and next everything out, then complete.
+const source$ = Rx.Observable.from(data);
+
 console.log('start');
 source$.subscribe(
   x => console.log(x),

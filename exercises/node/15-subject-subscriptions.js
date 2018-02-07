@@ -9,10 +9,14 @@ const subject = new Subject();
 const subA = subject.subscribe(observerA);
 const subB = subject.subscribe(observerB);
 
+// you can unsubscribe one item at a time from the subject.  subA.unsubscribe(); subB.unsubscribe();  subject still remains even though it's empty of subscriptions.
+
 subject.next(1);
 subject.next(2);
+subA.unsubscribe();
 subject.next(3);
 subject.next(4);
+subB.unsubscribe();
 subject.next(5);
 subject.complete();
 
